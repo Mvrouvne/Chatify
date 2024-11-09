@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="User info and chat interface">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>User Info</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        #messageInput {
+            width: calc(100% - 20px);
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #messageInput:focus {
+            border-color: #007BFF;
+        }
+
+        button {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+
+        button.send {
+            background-color: #28a745;
+            color: white;
+        }
+
+        button.send:hover {
+            background-color: #218838;
+        }
+
+        button.disconnect {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        button.disconnect:hover {
+            background-color: #c82333;
+        }
+
+        .messages {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            text-align: left;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+        }
+
+        .message {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .message.user {
+            background-color: #d1e7dd;
+        }
+
+        .message.system {
+            background-color: #f5f5f5;
+            color: #555;
+        }
+
+        .message .username {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>User Info</h1>
+        <input type="text" id="messageInput" placeholder="Enter your message here...">
+        <div>
+            <button class="send" onclick="sendMessage()">Send Message</button>
+            <button class="disconnect" onclick="disconnect()">Disconnect</button>
+        </div>
+
+        <!-- Display messages -->
+        <div id="messages" class="messages"></div>
+    </div>
+
+    <script>
+        // Retrieve the token from localStorage (assuming it's stored after login/signup)
+        const token = localStorage.getItem('authToken'); // Adjust 'authToken' to your key
+
+        if (!token) {
+            alert("No token found. Please log in first.");
+            throw new Error("Token is missing");
+        }
+
+        // Establish a connection to the WebSocket server using the token
+        const socket = new WebSocket(`ws://localhost:8000/ws/chat/6/?Token=${token}`);
+
+        // Function to send a message to the WebSocket server
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+
+            if (message) {
+                const username = 'User'; // Adjust as needed or fetch from localStorage
+                socket.send(JSON.stringify({'message': message, 'user': username}));
+                messageInput.value = ''; // Clear the input field
+            }
+        }
+
+        // Function to disconnect from the WebSocket server
+        function disconnect() {
+            socket.close();
+            console.log("Disconnected from the WebSocket server.");
+        }
+
+        // Event listener for connection open
+        socket.onopen = function(e) {
+            console.log("Connection established!");
+        };
+
+        // Event listener for messages from the WebSocket server
+        socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            displayMessage(data.message, data.user || "Unknown User");  // Use the user from the data
+        };
+
+        // Event listener for connection close
+        socket.onclose = function(e) {
+            console.log("Connection closed.");
+        };
+
+        // Event listener for connection error
+        socket.onerror = function(e) {
+            console.error("WebSocket error:", e);
+        };
+
+        // Function to display messages on the page
+        function displayMessage(message, user) {
+            const messagesDiv = document.getElementById('messages');
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', 'user');
+            messageElement.innerHTML = `<span class="username">${user}:</span> ${message}`;
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;  // Auto-scroll to the latest message
+        }
+    </script>
+
+</body>
+</html>

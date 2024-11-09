@@ -1,0 +1,39 @@
+services:
+  frontend:
+    container_name: frontend
+    image: frontend
+    build: frontend/
+    ports:
+      - 8001:8001
+    volumes:
+      - ./frontend:/frontend
+      
+
+  # backend:
+  #   container_name: backend
+  #   image: backend
+  #   build:
+  #     context: . # to include pipfiles that are in the parent directory
+  #     dockerfile: backend/Dockerfile
+  #   ports:
+  #     - 8000:8000
+  #   depends_on:
+  #     - frontend
+  #     - database
+    
+  database:
+    container_name: database
+    image: postgres
+    env_file:
+      - ./backend/.env
+    ports:
+      - 5432:5432
+    restart: always
+    volumes:
+      - ./database/data:/var/lib/postgresql/data
+    
+  redis:
+    container_name: redis
+    image: redis
+    ports:
+      - 6379:6379
