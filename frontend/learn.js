@@ -36,6 +36,7 @@ let blockChat = document.querySelector('.modal-block-button');
 let currentSender;
 let urls = [];
 let path;
+let blockList = [];
 
 function scrollBottom() {
     mainChat.scrollTop = mainChat.scrollHeight;
@@ -160,6 +161,10 @@ function convClick(conv, singleConv) {
         conversationTopBar.style.display = 'flex';
         mainChat.style.display = 'flex';
         sending.style.display = 'flex';
+        if (blockList.includes(conv.id))
+            disableMessageBar();
+        else
+            enableMessageBar();
         listMessages(conv);
         realTime(conv, singleConv);
     })
@@ -218,7 +223,7 @@ function realTime(conv, singleConv) {
                 // console.log(receivedMessage.user);
                 if (conv.conversation == receivedMessage.user)
                 {
-                    console.log(singleConv);
+                    // console.log(singleConv);
                     let newLeftMessage = leftMessage.cloneNode(true);
                     newLeftMessage.querySelector('.left-message-p').textContent = receivedMessage.message;
                     newLeftMessage.style.display = 'inline-block';
@@ -226,7 +231,7 @@ function realTime(conv, singleConv) {
                 }
                 else
                 {
-                    console.log(singleConv);
+                    // console.log(singleConv);
                     let newRightMessage = rightMessage.cloneNode(true);
                     newRightMessage.querySelector('.right-message-p').textContent = receivedMessage.message;
                     newRightMessage.style.display = 'inline-block';
@@ -253,12 +258,9 @@ function realTime(conv, singleConv) {
             removeBlur();
         }
         else if (receivedMessage.type == 'block_user') {
-            messageBar.placeholder = 'You cannot send a message to this user';
-            messageBar.style.textAlign = 'center';
-            messageBar.value = '';
-            messageBar.disabled = true;
-            sendButton.disabled = true;
-            sendButton.style.cursor = 'default';
+            // console.log(singleConv)
+            blockList.push(conv.id);
+            disableMessageBar();
             removeBlur();
         }
         console.log('Message from server: ', receivedMessage.message);
@@ -303,6 +305,24 @@ function realTime(conv, singleConv) {
         // let data = { 'message': 'hello', 'user': 'kouferka' };
         // socket.send(JSON.stringify(data));
     }
+}
+
+function disableMessageBar() {
+    messageBar.placeholder = 'You cannot send a message to this user';
+    messageBar.style.textAlign = 'center';
+    messageBar.value = '';
+    messageBar.disabled = true;
+    sendButton.disabled = true;
+    sendButton.style.cursor = 'default';
+}
+
+function enableMessageBar() {
+    messageBar.placeholder = 'Type a message...';
+    messageBar.style.textAlign = 'left';
+    messageBar.value = '';
+    messageBar.disabled = false;
+    sendButton.disabled = false;
+    sendButton.style.cursor = 'pointer';
 }
 
 listConversations();
