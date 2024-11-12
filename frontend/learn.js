@@ -210,7 +210,7 @@ function realTime(conv, singleConv) {
     // messageInput.addEventListener('click', () => {
     const token = localStorage.getItem('authToken');
     if (!socket || socket.readyState !== WebSocket.OPEN)
-        socket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${conv.id}/?Token=${token}`);
+        socket = new WebSocket(`wss://127.0.0.1:8000/ws/chat/${conv.id}/?Token=${token}`);
     socket.onmessage = ({ data }) => {
         let receivedMessage = JSON.parse(data);
         // console.log('mmmmm');

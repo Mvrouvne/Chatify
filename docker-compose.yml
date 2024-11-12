@@ -23,7 +23,7 @@ services:
     
   database:
     container_name: database
-    image: postgres:13
+    image: postgres
     env_file:
       - ./backend/.env
     ports:
