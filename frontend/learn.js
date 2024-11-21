@@ -6,8 +6,11 @@ let div1 = document.querySelector('.div1');
 let div2 = document.querySelector('.div2');
 let div3 = document.querySelector('.div3');
 let modal = document.querySelector('.modal');
+let modalUser = document.querySelector('.modal-user')
 let modalContent = document.querySelector('.modal-content');
 let modalContent2 = document.querySelector('.modal-content2');
+let modalInput = document.querySelector('.modal-input')
+let userField = document.querySelector('.user-field')
 let chatBar = document.querySelector('.chat-bar');
 let chatContent = document.querySelector('.chat-content');
 let deleteButton = document.querySelector('.delete-button');
@@ -105,7 +108,10 @@ modalCancelButton3.addEventListener('click', removeBlur);
 
 newChatPageButton.addEventListener('click', addFriend);
 
+// input handling
+
 sideSearchBar.addEventListener('input', (input) => {
+    // console.log(input);
     const value = input.target.value.toLowerCase();
     // console.log(singleConversationList.single);
     let matchingUsers = [];
@@ -120,6 +126,39 @@ sideSearchBar.addEventListener('input', (input) => {
         let newUser = conversations.appendChild(user.single.cloneNode(true));
         convClick(user.conv, newUser);
     })
+})
+
+modalInput.addEventListener('input', (input) => {
+    const value = input.target.value.toLowerCase();
+    let matchingUsers = [];
+    const token = localStorage.getItem('authToken');
+    fetch('http://localhost:8000/api/list-users/', {
+        method: 'GET',
+        headers: { 'Authorization': `Token ${token}`}
+    })
+        .then(response => response.json())
+        .then(data => data.forEach(user => {
+            // console.log(user)
+            let newUser = modalUser.cloneNode(true);
+            newUser.querySelector('p').textContent = user.username;
+            newUser.style.display = 'flex';
+            // userField.appendChild(newUser);
+            if (value != '') {
+                let matchingUser = newUser.querySelector('p').textContent.toLowerCase().includes(value);
+                if (matchingUser)
+                    matchingUsers.push(newUser);
+            }
+        }))
+        .then(() => {
+            userField.innerHTML = '';
+            matchingUsers.forEach(user => {
+                let newUser = userField.appendChild(user);
+                convClick(user, newUser);
+            })
+            console.log('noo');
+        })
+        .catch(error => console.error('Error:', error));
+
 })
 
 function urlHandling() {
@@ -149,6 +188,9 @@ function listConversations() {
 }
 
 function convClick(conv, singleConv) {
+    // console.log(conv);
+    // console.log('----')
+    // console.log(singleConv);
     singleConv.addEventListener('click', () => {
         if (socket && socket.readyState === WebSocket.OPEN) {
             socket.close(); // Close the current WebSocket
@@ -210,7 +252,7 @@ function realTime(conv, singleConv) {
     // messageInput.addEventListener('click', () => {
     const token = localStorage.getItem('authToken');
     if (!socket || socket.readyState !== WebSocket.OPEN)
-        socket = new WebSocket(`wss://127.0.0.1:8000/ws/chat/${conv.id}/?Token=${token}`);
+        socket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${conv.id}/?Token=${token}`);
     socket.onmessage = ({ data }) => {
         let receivedMessage = JSON.parse(data);
         // console.log('mmmmm');

@@ -7,19 +7,25 @@ services:
       - 8001:8001
     volumes:
       - ./frontend:/frontend
+    networks:
+      - chat_network
       
 
-  # backend:
-  #   container_name: backend
-  #   image: backend
-  #   build:
-  #     context: . # to include pipfiles that are in the parent directory
-  #     dockerfile: backend/Dockerfile
-  #   ports:
-  #     - 8000:8000
-  #   depends_on:
-  #     - frontend
-  #     - database
+  backend:
+    container_name: chat_backend
+    image: backend
+    build:
+      context: . # to include pipfiles that are in the parent directory
+      dockerfile: backend/Dockerfile
+    ports:
+      - 8000:8000
+    depends_on:
+      - frontend
+      - database
+    volumes:
+      - ./backend:/backend
+    networks:
+      - chat_network
     
   database:
     container_name: database
@@ -31,9 +37,17 @@ services:
     restart: always
     volumes:
       - ./database/data:/var/lib/postgresql/data
+    networks:
+      - chat_network
     
   redis:
-    container_name: redis
+    container_name: rediss
     image: redis
     ports:
       - 6379:6379
+    networks:
+      - chat_network
+
+networks:
+  chat_network:
+    driver: bridge

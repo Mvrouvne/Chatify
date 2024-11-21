@@ -21,3 +21,5 @@ HANDLE when to stop and when to start a WebSocket connection
 CHECK if user is blocked when listing messages to block the message input if so
 
 AFTER blocking the user in the chat disable the play button functionality
+
+STOP FETCHING "fetch('http://localhost:8000/api/list-users/', {" in each input

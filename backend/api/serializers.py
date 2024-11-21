@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from chat.models import Messages, Conversations
+from django.contrib.auth.models import User
 
 class   ChatOverviewSerializer(serializers.ModelSerializer):
     conversation = serializers.SerializerMethodField()
@@ -31,3 +32,9 @@ class   CreateConversationSerializer(serializers.ModelSerializer):
     class   Meta:
         model = Conversations   
         fields = ['user1_id', 'user2_id']
+
+class   ListUsersSerializer(serializers.ModelSerializer):
+
+    class   Meta:
+        model = User
+        fields = ['username', 'id']
