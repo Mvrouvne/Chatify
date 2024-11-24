@@ -140,11 +140,12 @@ modalInput.addEventListener('input', (input) => {
         .then(data => data.forEach(user => {
             // console.log(user)
             let newUser = modalUser.cloneNode(true);
-            newUser.querySelector('p').textContent = user.username;
+            console.log(newUser)
+            newUser.querySelector('.li1').textContent = user.username;
             newUser.style.display = 'flex';
             // userField.appendChild(newUser);
             if (value != '') {
-                let matchingUser = newUser.querySelector('p').textContent.toLowerCase().includes(value);
+                let matchingUser = newUser.querySelector('.li1').textContent.toLowerCase().includes(value);
                 if (matchingUser)
                     matchingUsers.push(newUser);
             }
@@ -188,9 +189,9 @@ function listConversations() {
 }
 
 function convClick(conv, singleConv) {
-    // console.log(conv);
-    // console.log('----')
-    // console.log(singleConv);
+    console.log(conv);
+    console.log('----')
+    console.log(singleConv);
     singleConv.addEventListener('click', () => {
         if (socket && socket.readyState === WebSocket.OPEN) {
             socket.close(); // Close the current WebSocket

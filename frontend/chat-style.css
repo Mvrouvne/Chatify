@@ -624,7 +624,18 @@ body {
     object-position: center; /* Center the image if it's being cropped */
 }
 
-.modal-user p {
+.modal-user ul {
+    list-style: none;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: left;
+    padding-left: 5px;
+}
+
+.modal-user .li1 {
+    list-style: none;
     align-self: center;
     font-family: 'Baloo Bhai 2', cursive;
     font-size: 20px;
