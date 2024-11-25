@@ -40,6 +40,7 @@ let currentSender;
 let urls = [];
 let path;
 let blockList = [];
+let currentUser;
 
 function scrollBottom() {
     mainChat.scrollTop = mainChat.scrollHeight;
@@ -49,6 +50,8 @@ const removeBlur = () => {
     chatBar.style.filter = 'none';
     chatContent.style.filter = 'none';
     modal.style.display = 'none';
+    userField.innerHTML = '';
+    modalInput.value = '';
 }
 
 const addFriend = () => {
@@ -130,7 +133,6 @@ sideSearchBar.addEventListener('input', (input) => {
 
 modalInput.addEventListener('input', (input) => {
     const value = input.target.value.toLowerCase();
-    let matchingUsers = [];
     const token = localStorage.getItem('authToken');
     fetch('http://localhost:8000/api/list-users/', {
         method: 'GET',
@@ -140,33 +142,79 @@ modalInput.addEventListener('input', (input) => {
         .then(data => data.forEach(user => {
             // console.log(user)
             let newUser = modalUser.cloneNode(true);
-            console.log(newUser)
+            // console.log(newUser)
             newUser.querySelector('.li1').textContent = user.username;
             newUser.style.display = 'flex';
             // userField.appendChild(newUser);
             if (value != '') {
                 let matchingUser = newUser.querySelector('.li1').textContent.toLowerCase().includes(value);
                 if (matchingUser)
-                    matchingUsers.push(newUser);
+                {
+                    userField.appendChild(newUser);
+                    startConversation(newUser, user);
+                }
             }
         }))
-        .then(() => {
-            userField.innerHTML = '';
-            matchingUsers.forEach(user => {
-                let newUser = userField.appendChild(user);
-                convClick(user, newUser);
-            })
-            console.log('noo');
-        })
         .catch(error => console.error('Error:', error));
-
+        userField.innerHTML = '';
 })
+
+function startConversation(singleUser, userData) {
+    singleUser.addEventListener('click', () => {
+        console.log(singleUser, userData);
+        removeBlur();
+        const token = localStorage.getItem('authToken');
+        fetch('http://localhost:8000/api/create-conv/', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Token ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 'user1_id': userData.id, 'user2_id': currentUser})
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data['error']) {
+                    console.log('error');
+                    for (let i = 0; singleConversationList[i]; i++){
+                        if (singleConversationList[i].conv.id == data.id)
+                        {
+                            // console.log(singleConversationList[i].single);
+                            convClickAction(singleConversationList[i].conv,
+                                singleConversationList[i].single);
+                            break;
+                        }
+                    }
+                }
+                else {
+                    console.log('noooo error');
+                    let newSingleConversation = singleConversation.cloneNode(true);
+                    newSingleConversation.querySelector('.li1').textContent = userData.username;
+                    newSingleConversation.style.display = 'flex';
+                    let fullConv = {
+                        'single': newSingleConversation,
+                        'conv': { 'id': data.id, 'conversation': userData.username },
+                    }
+                    singleConversationList.push(fullConv);
+                    conversations.appendChild(newSingleConversation);
+                    // newSingleConversation.addEventListener('click', () => {
+                    //     convClickAction({ 'id': data.id, 'conversation': userData.username }, singleUser);
+                    // })
+                    convClick({ 'id': data.id, 'conversation': userData.username }, newSingleConversation);
+                    convClickAction({ 'id': data.id, 'conversation': userData.username }, newSingleConversation);
+                }
+                // listConversations();
+            })
+            .catch(error => console.error('Error:', error));
+    })
+}
 
 function urlHandling() {
 
 }
 
 function listConversations() {
+    // conversations.innerHTML = '';
     const token = localStorage.getItem('authToken');
     fetch('http://localhost:8000/api/chat/', {
         method: 'GET',
@@ -174,6 +222,7 @@ function listConversations() {
     })
         .then(response => response.json())
         .then(data => data.conversations.forEach(conv => {
+            currentUser = conv.currentUser;
             let newSingleConversation = singleConversation.cloneNode(true);
             newSingleConversation.querySelector('.li1').textContent = conv.conversation;
             newSingleConversation.style.display = 'flex';
@@ -189,28 +238,33 @@ function listConversations() {
 }
 
 function convClick(conv, singleConv) {
-    console.log(conv);
-    console.log('----')
-    console.log(singleConv);
     singleConv.addEventListener('click', () => {
-        if (socket && socket.readyState === WebSocket.OPEN) {
-            socket.close(); // Close the current WebSocket
-        }
-        if (currentConversation)
-            currentConversation.style.backgroundColor = '';
-        currentConversation = singleConv;
-        singleConv.style.backgroundColor = '#2E2E2E';
-        newChatPage.style.display = 'none';
-        conversationTopBar.style.display = 'flex';
-        mainChat.style.display = 'flex';
-        sending.style.display = 'flex';
-        if (blockList.includes(conv.id))
-            disableMessageBar();
-        else
-            enableMessageBar();
-        listMessages(conv);
-        realTime(conv, singleConv);
+        convClickAction(conv, singleConv);
     })
+}
+
+function convClickAction(conv, singleConv) {
+    // console.log(conv);
+    // console.log('--88--');
+    // console.log(singleConv);
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.close(); // Close the current WebSocket
+    }
+    if (currentConversation)
+        currentConversation.style.backgroundColor = '';
+    currentConversation = singleConv;
+    console.log('iyeeeehh');
+    singleConv.style.backgroundColor = '#2E2E2E';
+    newChatPage.style.display = 'none';
+    conversationTopBar.style.display = 'flex';
+    mainChat.style.display = 'flex';
+    sending.style.display = 'flex';
+    if (blockList.includes(conv.id))
+        disableMessageBar();
+    else
+        enableMessageBar();
+    listMessages(conv);
+    realTime(conv, singleConv);
 }
 
 function listMessages(conv) {

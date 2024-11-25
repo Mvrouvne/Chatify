@@ -16,7 +16,7 @@ class   ChatOverview(APIView):
             )
         serializeChat = ChatOverviewSerializer(conversations, many=True, context={'request': request})
         data = {
-            'conversations': serializeChat.data
+            'conversations': serializeChat.data,
             # Add conversations images
         }
         return Response(data)
@@ -60,7 +60,7 @@ class   CreateConversation(APIView):
             (Q(user1_id=user2_id) & Q(user2_id=user1_id)
         )).first()
         if existingConversation:
-            return Response({'error': 'This conversation already exists.'},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'This conversation already exists.', 'id': existingConversation.id})
 
         SerializedUsers = CreateConversationSerializer(data=request.data)
         if SerializedUsers.is_valid():
