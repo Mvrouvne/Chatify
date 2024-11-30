@@ -221,19 +221,24 @@ function listConversations() {
         headers: { 'Authorization': `Token ${token}`}
     })
         .then(response => response.json())
-        .then(data => data.conversations.forEach(conv => {
-            currentUser = conv.currentUser;
-            let newSingleConversation = singleConversation.cloneNode(true);
-            newSingleConversation.querySelector('.li1').textContent = conv.conversation;
-            newSingleConversation.style.display = 'flex';
-            let fullConv = {
-                'single': newSingleConversation,
-                'conv': conv,
+        .then(data => {
+            currentUser = data.conversations[0].currentUser;
+            if (data.conversations[0].id != undefined) {
+                data.conversations.forEach(conv => {
+                currentUser = conv.currentUser;
+                let newSingleConversation = singleConversation.cloneNode(true);
+                newSingleConversation.querySelector('.li1').textContent = conv.conversation;
+                newSingleConversation.style.display = 'flex';
+                let fullConv = {
+                    'single': newSingleConversation,
+                    'conv': conv,
+                }
+                singleConversationList.push(fullConv);
+                conversations.appendChild(newSingleConversation);
+                convClick(conv, newSingleConversation);
+                })
             }
-            singleConversationList.push(fullConv);
-            conversations.appendChild(newSingleConversation);
-            convClick(conv, newSingleConversation);
-        }))
+        })
         .catch(error => console.error('Error:', error));
 }
 
