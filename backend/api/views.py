@@ -16,9 +16,16 @@ class   ChatOverview(APIView):
             )
         serializeChat = ChatOverviewSerializer(conversations, many=True, context={'request': request})
         data = {
-            'conversations': serializeChat.data,
+            'conversations': serializeChat.data
             # Add conversations images
         }
+        # print(data['conversations'])
+        if not data['conversations']:
+            print('--------------8---------------')
+            data['conversations'].append({'currentUser': request.user.id})
+            # print(data['conversations'][0]['currentUser'])
+            # data['conversations'][0]['currentUser'] = request.user.id
+            print(data['conversations'][0]['currentUser'])
         return Response(data)
 
 

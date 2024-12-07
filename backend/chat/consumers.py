@@ -1,9 +1,10 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .models import Conversations, Messages
+from .models import Conversations, Messages, BlockList
 from django.contrib.auth.models import User
 from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
+from django.db.models import Q
 
 class   ChatConsumer(AsyncWebsocketConsumer):
     async def   connect(self):
@@ -17,17 +18,29 @@ class   ChatConsumer(AsyncWebsocketConsumer):
             return
         
         self.user = self.scope['user']
-        user1_id = await sync_to_async(lambda: self.conversation.user1_id)()
-        user2_id = await sync_to_async(lambda: self.conversation.user2_id)()
+        self.user1_id = await sync_to_async(lambda: self.conversation.user1_id)()
+        self.user2_id = await sync_to_async(lambda: self.conversation.user2_id)()
 
-        # I think i should check if user is blocked
         print ("selfUser = ", self.user)
 
-        if self.user.is_authenticated and self.user in [user1_id, user2_id]:
+        if self.user.is_authenticated and self.user in [self.user1_id, self.user2_id]:
             print ("USER is authenticated")
             await self.channel_layer.group_add(self.conversation_id, self.channel_name)
         
             await self.accept()
+            existingBlock = await database_sync_to_async(BlockList.objects.filter(
+                conversation_id=self.conversation.id
+                ).first)()
+            if existingBlock:
+                block_details = await database_sync_to_async(BlockList.objects.get)(conversation_id=self.conversation_id)
+                await self.channel_layer.group_send(
+                    self.conversation_id,
+                    {
+                        'type': 'block_user',
+                        'blocker': block_details.blocker_id,
+                        'blocked': block_details.blocked_id
+                    }
+                )
         else:
             print ("USER is NOT authenticated")
             await self.close()
@@ -58,12 +71,55 @@ class   ChatConsumer(AsyncWebsocketConsumer):
         )
         ### Blocking a user action ###
         elif 'action' in text_data_dic and text_data_dic['action'] == 'block':
-            await self.channel_layer.group_send(
-                self.conversation_id,
-                {
-                    'type': 'block_user',
-                }
-            )
+            try:
+                TheBlocker = await database_sync_to_async(User.objects.get)(id=self.scope['user'].id)
+                TheBlocked = None
+                if TheBlocker.id == self.user1_id.id:
+                    TheBlocked = await database_sync_to_async(User.objects.get)(id=self.user2_id.id)
+                else:
+                    TheBlocked = await database_sync_to_async(User.objects.get)(id=self.user1_id.id)
+
+                block_action = BlockList(
+                    blocker = TheBlocker,
+                    blocked = TheBlocked,
+                    conversation_id = self.conversation
+                )
+                print('blllloooooooooockkkkkk')
+                print(self.conversation.id)
+                existingBlock = await database_sync_to_async(BlockList.objects.filter(
+                    conversation_id=self.conversation.id
+                    ).first)()
+                if not existingBlock:
+                    print('NOOT EXISTING')
+                    await database_sync_to_async(block_action.save)()
+                
+                block_details = await database_sync_to_async(BlockList.objects.get)(conversation_id=self.conversation_id)
+                await self.channel_layer.group_send(
+                    self.conversation_id,
+                    {
+                        'type': 'block_user',
+                        'blocker': block_details.blocker_id,
+                        'blocked': block_details.blocked_id
+                    }
+                )
+            except Exception as e:
+                print(f'Exception raised, reason {e}')
+
+        ### Unblocking a user action ###
+        elif 'action' in text_data_dic and text_data_dic['action'] == 'unblock':
+            try:
+                print('uunnnnnnnnnblllloooooooooockkkkkk')
+                to_unblock = await database_sync_to_async(BlockList.objects.get)(conversation_id=self.conversation_id)
+                if to_unblock:
+                    await database_sync_to_async(to_unblock.delete)()
+                await self.channel_layer.group_send(
+                    self.conversation_id,
+                    {
+                        'type': 'unblock_user',
+                    }
+                )
+            except Exception as e:
+                print(f'Exception raised, reason {e}')
 
         ### Sending messages action ###
         elif 'message' in text_data_dic:
@@ -72,22 +128,26 @@ class   ChatConsumer(AsyncWebsocketConsumer):
             user = self.scope['user'].username
             print ("UUSER = ", user)
 
-            # DB saving///////////////////////////
-            received_message = Messages(
-                content = message,
-                sender_id = await database_sync_to_async(User.objects.get)(username=user),
-                conversation_id = await database_sync_to_async(Conversations.objects.get)(id=self.conversation_id),
-            )
-            await database_sync_to_async(received_message.save)()
+            existingBlock = await database_sync_to_async(BlockList.objects.filter(
+                (Q(blocker=self.user1_id.id, blocked=self.user2_id.id)) | (Q(blocker=self.user2_id.id, blocked=self.user1_id.id))
+                ).first)()
+            if not existingBlock:
+                # DB saving ************
+                received_message = Messages(
+                    content = message,
+                    sender_id = await database_sync_to_async(User.objects.get)(username=user),
+                    conversation_id = await database_sync_to_async(Conversations.objects.get)(id=self.conversation_id),
+                )
+                await database_sync_to_async(received_message.save)()
 
-            await self.channel_layer.group_send(
-                self.conversation_id,
-                {
-                    'type': 'send_message',
-                    'message': message,
-                    'user': user,
-                }
-            )
+                await self.channel_layer.group_send(
+                    self.conversation_id,
+                    {
+                        'type': 'send_message',
+                        'message': message,
+                        'user': user,
+                    }
+                )
     
     async def   send_message(self, event):
         await self.send(text_data=json.dumps(
@@ -106,10 +166,20 @@ class   ChatConsumer(AsyncWebsocketConsumer):
                 'user': event['user'],
             }
         ))
+        await self.close()
 
     async def   block_user(self, event):
         await self.send(text_data=json.dumps(
             {
                 'type': 'block_user',
+                'blocker': event['blocker'],
+                'blocked': event['blocked']
+            }
+        ))
+
+    async def   unblock_user(self, event):
+        await self.send(text_data=json.dumps(
+            {
+                'type': 'unblock_user',
             }
         ))

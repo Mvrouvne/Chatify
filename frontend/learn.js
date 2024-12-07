@@ -36,6 +36,7 @@ let singleConversationList = [];
 let socket;
 let deleteChat = document.querySelector('.modal-delete-button');
 let blockChat = document.querySelector('.modal-block-button');
+let unblockChat = document.querySelector('.modal-unblock-button');
 let currentSender;
 let urls = [];
 let path;
@@ -174,6 +175,9 @@ function startConversation(singleUser, userData) {
         })
             .then(response => response.json())
             .then(data => {
+                console.log('hnnaaa');
+                console.log(userData.id);
+                console.log(currentUser);
                 if (data['error']) {
                     console.log('error');
                     for (let i = 0; singleConversationList[i]; i++){
@@ -214,28 +218,27 @@ function urlHandling() {
 }
 
 function listConversations() {
-    // conversations.innerHTML = '';
     const token = localStorage.getItem('authToken');
     fetch('http://localhost:8000/api/chat/', {
         method: 'GET',
         headers: { 'Authorization': `Token ${token}`}
     })
         .then(response => response.json())
-        .then(data => {
+        .then(data => { 
             currentUser = data.conversations[0].currentUser;
             if (data.conversations[0].id != undefined) {
                 data.conversations.forEach(conv => {
-                currentUser = conv.currentUser;
-                let newSingleConversation = singleConversation.cloneNode(true);
-                newSingleConversation.querySelector('.li1').textContent = conv.conversation;
-                newSingleConversation.style.display = 'flex';
-                let fullConv = {
-                    'single': newSingleConversation,
-                    'conv': conv,
-                }
-                singleConversationList.push(fullConv);
-                conversations.appendChild(newSingleConversation);
-                convClick(conv, newSingleConversation);
+                    console.log('dkhaaaaal');
+                    let newSingleConversation = singleConversation.cloneNode(true);
+                    newSingleConversation.querySelector('.li1').textContent = conv.conversation;
+                    newSingleConversation.style.display = 'flex';
+                    let fullConv = {
+                        'single': newSingleConversation,
+                        'conv': conv,
+                    }
+                    singleConversationList.push(fullConv);
+                    conversations.appendChild(newSingleConversation);
+                    convClick(conv, newSingleConversation);
                 })
             }
         })
@@ -264,10 +267,10 @@ function convClickAction(conv, singleConv) {
     conversationTopBar.style.display = 'flex';
     mainChat.style.display = 'flex';
     sending.style.display = 'flex';
-    if (blockList.includes(conv.id))
-        disableMessageBar();
-    else
-        enableMessageBar();
+    // if (blockList.includes(conv.id))
+    //     disableMessageBar();
+    // else
+    //     enableMessageBar();
     listMessages(conv);
     realTime(conv, singleConv);
 }
@@ -305,11 +308,6 @@ function listMessages(conv) {
 }
 
 function realTime(conv, singleConv) {
-    console.log('ccvvvvv');
-    // console.log(conv);
-    // console.log('ssiiingl');
-    // console.log(singleConv);
-    // messageInput.addEventListener('click', () => {
     const token = localStorage.getItem('authToken');
     if (!socket || socket.readyState !== WebSocket.OPEN)
         socket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${conv.id}/?Token=${token}`);
@@ -343,7 +341,7 @@ function realTime(conv, singleConv) {
             }
             scrollBottom();
         }
-        if (receivedMessage.type == 'delete_message') {
+        else if (receivedMessage.type == 'delete_message') {
             let messages;
             if (conv.conversation == receivedMessage.user)
                 messages = mainChat.querySelectorAll('.left-message');
@@ -360,14 +358,37 @@ function realTime(conv, singleConv) {
             removeBlur();
         }
         else if (receivedMessage.type == 'block_user') {
-            // console.log(singleConv)
+            console.log('222222222222222222');
+            console.log(receivedMessage);
+            console.log(currentUser);
             blockList.push(conv.id);
             disableMessageBar();
             removeBlur();
+            if (currentUser == receivedMessage.blocked)
+                blockButton.disabled = true;
+            else {
+                blockChat.style.display = 'none';
+                unblockChat.style.display = 'block';
+                div3.querySelector('.modal-content3 .modal-delete-message3').textContent = 'UNBLOCK THIS USER?'
+            }
+        }
+        else if (receivedMessage.type == 'unblock_user') {
+            console.log('333333333333333333');
+            enableMessageBar();
+            removeBlur();
+            blockButton.disabled = false;
+            blockChat.style.display = 'block';
+            unblockChat.style.display = 'none';
+            div3.querySelector('.modal-content3 .modal-delete-message3').textContent = 'BLOCK THIS USER?'
         }
         console.log('Message from server: ', receivedMessage.message);
     }
     socket.onopen = () => {
+        enableMessageBar();
+        blockButton.disabled = false;
+        blockChat.style.display = 'block';
+        unblockChat.style.display = 'none';
+        div3.querySelector('.modal-content3 .modal-delete-message3').textContent = 'BLOCK THIS USER?'
         sendButton.addEventListener('click', () => {
             if (messageInput.value)
             {
@@ -403,9 +424,14 @@ function realTime(conv, singleConv) {
         blockChat.addEventListener('click', () => {
             let action = { 'action': 'block' };
             socket.send(JSON.stringify(action));
+            console.log(conv);
         })
-        // let data = { 'message': 'hello', 'user': 'kouferka' };
-        // socket.send(JSON.stringify(data));
+
+        unblockChat.addEventListener('click', () => {
+            console.log('UNBLOCKK');
+            let action = { 'action': 'unblock' };
+            socket.send(JSON.stringify(action));
+        })
     }
 }
 

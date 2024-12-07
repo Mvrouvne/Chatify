@@ -17,9 +17,10 @@ class   Messages(models.Model):
     def __str__(self):
         return f'message of {self.sender_id.username}'
 
-# class   BlockedList(models.Model):
-#     blocker = models.ForeignKey(User, related_name='blocker', on_delete=models.CASCADE) # the block action taker
-#     blocked = models.ForeignKey(User, related_name='blocked', on_delete=models.CASCADE) # the one who was blocked
+class   BlockList(models.Model):
+    blocker = models.ForeignKey(User, related_name='blocker', on_delete=models.CASCADE) # the block action taker
+    blocked = models.ForeignKey(User, related_name='blocked', on_delete=models.CASCADE) # the one who was blocked
+    conversation_id = models.ForeignKey(Conversations, on_delete=models.CASCADE)
 
-#     def __str__(self):
-#         return f'{self.blocker} blocked {self.blocked}'
+    def __str__(self):
+        return f'{self.blocker} blocked {self.blocked}'
