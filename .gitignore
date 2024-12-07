@@ -1,5 +1,5 @@
 /database/data/*
 !/database/data/.gitkeep
 
-/backend/.env
+# /backend/.env
 .DS_Store
