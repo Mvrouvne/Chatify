@@ -135,7 +135,7 @@ sideSearchBar.addEventListener('input', (input) => {
 modalInput.addEventListener('input', (input) => {
     const value = input.target.value.toLowerCase();
     const token = localStorage.getItem('authToken');
-    fetch('http://localhost:8000/api/list-users/', {
+    fetch('http://chat_backend:8000/api/list-users/', {
         method: 'GET',
         headers: { 'Authorization': `Token ${token}`}
     })
@@ -165,7 +165,7 @@ function startConversation(singleUser, userData) {
         console.log(singleUser, userData);
         removeBlur();
         const token = localStorage.getItem('authToken');
-        fetch('http://localhost:8000/api/create-conv/', {
+        fetch('http://chat_backend:8000/api/create-conv/', {
             method: 'POST',
             headers: {
                 'Authorization': `Token ${token}`,
@@ -219,7 +219,7 @@ function urlHandling() {
 
 function listConversations() {
     const token = localStorage.getItem('authToken');
-    fetch('http://localhost:8000/api/chat/', {
+    fetch('http://chat_backend:8000/api/chat/', {
         method: 'GET',
         headers: { 'Authorization': `Token ${token}`}
     })
@@ -277,7 +277,7 @@ function convClickAction(conv, singleConv) {
 
 function listMessages(conv) {
     const token = localStorage.getItem('authToken');
-    fetch(`http://localhost:8000/api/chat/${conv.id}/`, {
+    fetch(`http://chat_backend:8000/api/chat/${conv.id}/`, {
         method: 'GET',
         headers: { 'Authorization': `Token ${token}`}
     })
@@ -310,7 +310,7 @@ function listMessages(conv) {
 function realTime(conv, singleConv) {
     const token = localStorage.getItem('authToken');
     if (!socket || socket.readyState !== WebSocket.OPEN)
-        socket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${conv.id}/?Token=${token}`);
+        socket = new WebSocket(`ws://chat_backend:8000/ws/chat/${conv.id}/?Token=${token}`);
     socket.onmessage = ({ data }) => {
         let receivedMessage = JSON.parse(data);
         // console.log('mmmmm');
