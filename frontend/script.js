@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const email = signupEmailInput.value;
         const password = signupPasswordInput.value;
     
-        fetch('http://chat_backend:8000/api/auth/users/', {
+        fetch('http://localhost:8000/api/auth/users/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

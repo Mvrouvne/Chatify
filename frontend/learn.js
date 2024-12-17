@@ -37,7 +37,6 @@ let socket;
 let deleteChat = document.querySelector('.modal-delete-button');
 let blockChat = document.querySelector('.modal-block-button');
 let unblockChat = document.querySelector('.modal-unblock-button');
-let currentSender;
 let urls = [];
 let path;
 let blockList = [];
@@ -135,7 +134,7 @@ sideSearchBar.addEventListener('input', (input) => {
 modalInput.addEventListener('input', (input) => {
     const value = input.target.value.toLowerCase();
     const token = localStorage.getItem('authToken');
-    fetch('http://chat_backend:8000/api/list-users/', {
+    fetch('http://localhost:8000/api/list-users/', {
         method: 'GET',
         headers: { 'Authorization': `Token ${token}`}
     })
@@ -165,7 +164,7 @@ function startConversation(singleUser, userData) {
         console.log(singleUser, userData);
         removeBlur();
         const token = localStorage.getItem('authToken');
-        fetch('http://chat_backend:8000/api/create-conv/', {
+        fetch('http://localhost:8000/api/create-conv/', {
             method: 'POST',
             headers: {
                 'Authorization': `Token ${token}`,
@@ -219,7 +218,7 @@ function urlHandling() {
 
 function listConversations() {
     const token = localStorage.getItem('authToken');
-    fetch('http://chat_backend:8000/api/chat/', {
+    fetch('http://localhost:8000/api/chat/', {
         method: 'GET',
         headers: { 'Authorization': `Token ${token}`}
     })
@@ -277,7 +276,7 @@ function convClickAction(conv, singleConv) {
 
 function listMessages(conv) {
     const token = localStorage.getItem('authToken');
-    fetch(`http://chat_backend:8000/api/chat/${conv.id}/`, {
+    fetch(`http://localhost:8000/api/chat/${conv.id}/`, {
         method: 'GET',
         headers: { 'Authorization': `Token ${token}`}
     })
@@ -288,15 +287,12 @@ function listMessages(conv) {
             data.messages.forEach(message => {
                 if (message.sender == conv.conversation)
                 {
-                    // console.log("left")
-                    currentSender = message.sender_id;
                     let newLeftMessage = leftMessage.cloneNode(true);
                     newLeftMessage.querySelector('.left-message-p').textContent = message.content;
                     newLeftMessage.style.display = 'inline-block';
                     mainChat.appendChild(newLeftMessage);
                 }
                 else {
-                    currentSender = message.sender_id;
                     let newRightMessage = rightMessage.cloneNode(true);
                     newRightMessage.querySelector('.right-message-p').textContent = message.content;
                     newRightMessage.style.display = 'inline-block';
@@ -310,7 +306,7 @@ function listMessages(conv) {
 function realTime(conv, singleConv) {
     const token = localStorage.getItem('authToken');
     if (!socket || socket.readyState !== WebSocket.OPEN)
-        socket = new WebSocket(`ws://chat_backend:8000/ws/chat/${conv.id}/?Token=${token}`);
+        socket = new WebSocket(`ws://localhost:8000/ws/chat/${conv.id}/?Token=${token}`);
     socket.onmessage = ({ data }) => {
         let receivedMessage = JSON.parse(data);
         // console.log('mmmmm');
@@ -349,10 +345,7 @@ function realTime(conv, singleConv) {
                 messages = mainChat.querySelectorAll('.right-message');
             messages.forEach(message => {
                 console.log(message)
-                // console.log(conv.conversation)
-                // if (currentSender == conv.conversation)
-                // console.log('hna');
-                // message.style.display = 'none';
+
                 message.remove();
             })
             removeBlur();
@@ -416,8 +409,8 @@ function realTime(conv, singleConv) {
         })
 
         deleteChat.addEventListener('click', () => {
-            let action = { 'action': 'delete', 'sender_id': `${currentSender}` };
-            console.log(currentSender);
+            let action = { 'action': 'delete', 'sender_id': `${currentUser}` };
+            console.log(currentUser);
             socket.send(JSON.stringify(action));
         })
 

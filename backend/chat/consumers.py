@@ -59,8 +59,9 @@ class   ChatConsumer(AsyncWebsocketConsumer):
             sender_id = text_data_dic['sender_id']
             user = self.scope['user'].username
             print('±-------->', sender_id)
-            await database_sync_to_async(lambda: Messages.objects.filter(conversation_id=self.conversation_id, sender_id=sender_id).delete())()
-
+            existingMessage = await database_sync_to_async(Messages.objects.filter(conversation_id=self.conversation_id, sender_id=sender_id).first)()
+            if existingMessage:
+                await database_sync_to_async(lambda: Messages.objects.filter(conversation_id=self.conversation_id, sender_id=sender_id).delete())()
             await self.channel_layer.group_send(
                 self.conversation_id,
                 {
@@ -166,7 +167,6 @@ class   ChatConsumer(AsyncWebsocketConsumer):
                 'user': event['user'],
             }
         ))
-        await self.close()
 
     async def   block_user(self, event):
         await self.send(text_data=json.dumps(
