@@ -52,13 +52,13 @@ Here are some example screenshots of Chatify in action:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/chatify.git
+   git clone https://github.com/mvrouvne/chatify.git
    cd chatify
    ```
 2. **Run the Makefile**:
    Run ```make``` to run the app
 3. **Access the App**
-   Open your browser and navigate to ```http://localhost:8000``` to access Chatify's Registration Page.
+   Open your browser and navigate to ```http://localhost:8001``` to access Chatify's Registration Page.
 
 ---
 
