@@ -65,4 +65,4 @@ Here are some example screenshots of Chatify in action:
 ## Important Notes
 
 - **No Default Users**: By default, there are no pre-existing users in Chatify. Any registered user can be accessed via the **Plus (+) icon** or the **'FIND FRIENDS'** feature by searching for their **username**. This allows users to easily connect with others by their unique usernames.
-- The .env file is available you can edit database name and passwords.
+- The /backend/.env file is available you can edit database name and passwords.
