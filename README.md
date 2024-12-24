@@ -25,16 +25,16 @@
 Here are some example screenshots of Chatify in action:
 
 ### Chat Landing Page
-![Chat Landing](link_to_screenshot_here)
+![Chat Landing](readme_imgs/chat-overview.png)
 
 ### Conversation View
-![Conversation View](link_to_screenshot_here)
+![Conversation View](readme_imgs/conversation-view.png)
 
 ### Login View
-![User Profile](link_to_screenshot_here)
+![User Profile](readme_imgs/login-page.png)
 
 ### Finding Friends View
-![User Profile](link_to_screenshot_here)
+![User Profile](readme_imgs/find-friends-view.png)
 
 ---
 
