@@ -9,8 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Signup Form Elements
     const signupForm = document.querySelector('.signup .form');
     const signupUsernameInput = signupForm.querySelector('#register-username');
-    const signupFirstNameInput = signupForm.querySelector('#register-firstname'); // First Name field
-    const signupLastNameInput = signupForm.querySelector('#register-lastname'); // Last Name field
+    const signupFirstNameInput = signupForm.querySelector('#register-firstname');
+    const signupLastNameInput = signupForm.querySelector('#register-lastname');
     const signupEmailInput = signupForm.querySelector('#register-email');
     const signupPasswordInput = signupForm.querySelector('#register-password');
     const signupButton = signupForm.querySelector('#register-button');
@@ -58,7 +58,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('authToken', data.auth_token);
                 loginMessageElement.textContent = 'Login successful';
                 loginMessageElement.style.color = 'green';
-                window.location.href = 'http://localhost:8001/chat-dash.html';
+                // Add a delay before redirecting to ensure token is saved
+                setTimeout(() => {
+                    window.location.href = 'http://localhost:8001/chat-dash.html';
+                }, 100); // small delay to ensure token is stored
             } else {
                 loginMessageElement.textContent = 'Login failed: ' + JSON.stringify(data);
                 loginMessageElement.style.color = 'red';
@@ -74,8 +77,8 @@ document.addEventListener('DOMContentLoaded', function() {
     signupButton.addEventListener('click', function(event) {
         event.preventDefault();
         const username = signupUsernameInput.value;
-        const firstName = signupFirstNameInput.value; // Capture First Name
-        const lastName = signupLastNameInput.value;   // Capture Last Name
+        const firstName = signupFirstNameInput.value;
+        const lastName = signupLastNameInput.value;
         const email = signupEmailInput.value;
         const password = signupPasswordInput.value;
     
@@ -86,8 +89,8 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({
                 username: username,
-                first_name: firstName, // Send First Name to the API
-                last_name: lastName,   // Send Last Name to the API
+                first_name: firstName,
+                last_name: lastName,
                 email: email,
                 password: password,
             }),
@@ -95,17 +98,46 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.id) {
-                signupMessageElement.textContent = 'Signup successful';
-                signupMessageElement.style.color = 'green';
-                signinForm.style.display = 'block';
-                signupContainer.style.display = 'none';
+                // After successful signup, login to get the token
+                fetch('http://localhost:8000/api/auth/token/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                    }),
+                })
+                .then(loginResponse => loginResponse.json())
+                .then(loginData => {
+                    if (loginData.auth_token) {
+                        // Store the token in localStorage
+                        localStorage.setItem('authToken', loginData.auth_token);
+                        signupMessageElement.textContent = 'Signup successful and logged in';
+                        signupMessageElement.style.color = 'green';
+                        // Add a delay before redirecting to ensure token is saved
+                        setTimeout(() => {
+                            signinForm.style.display = 'block';
+                            signupContainer.style.display = 'none';
+                            window.location.href = 'http://localhost:8001/chat-dash.html'; // Redirect after saving token
+                        }, 100); // small delay
+                    } else {
+                        signupMessageElement.textContent = 'Login after signup failed: ' + JSON.stringify(loginData);
+                        signupMessageElement.style.color = 'red';
+                    }
+                })
+                .catch(error => {
+                    signupMessageElement.textContent = 'Error logging in after signup: ' + error;
+                    signupMessageElement.style.color = 'red';
+                });
             } else {
                 signupMessageElement.textContent = 'Signup failed: ' + JSON.stringify(data);
                 signupMessageElement.style.color = 'red';
             }
         })
         .catch(error => {
-            signupMessageElement.textContent = 'Error: ' + error;
+            signupMessageElement.textContent = 'Error during signup: ' + error;
             signupMessageElement.style.color = 'red';
         });
     });

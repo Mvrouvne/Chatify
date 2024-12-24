@@ -15,7 +15,7 @@ config = Config(RepositoryEnv(join(BASE_DIR, '.env')))
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 ALLOWED_HOSTS = ['*']
@@ -50,6 +50,13 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
+
+DJOSER = {
+    "SERIALIZERS": {
+        "user_create": "api.djoser_serializer.CustomUserCreateSerializer",
+    }
+}
+
 
 CHANNEL_LAYERS = {
     "default": {

@@ -4,7 +4,8 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Quicksand', sans-serif;
+  font-family: 'Baloo Bhai 2', cursive;
+  /* background-color: rgb(41, 27, 27); */
 }
 
 body {
@@ -32,7 +33,7 @@ section::before {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(#000,#0f0,#000);
+  background: linear-gradient(#000, #EC665F, #000);
   animation: animate 5s linear infinite;
 }
 
@@ -56,7 +57,7 @@ section span {
 }
 
 section span:hover {
-  background: #0f0;
+  background: #EC665F;
   transition: 0s;
 }
 
@@ -69,7 +70,7 @@ section span:hover {
   justify-content: center;
   align-items: center;
   padding: 40px;
-  border-radius: 4px;
+  border-radius: 20px;
   box-shadow: 0 15px 35px rgba(0,0,0,9);
 }
 
@@ -85,7 +86,7 @@ section span:hover {
 
 .signin .content h2, .signup .content h2 {
   font-size: 2em;
-  color: #0f0;
+  color: #EC665F;
   text-transform: uppercase;
 }
 
@@ -150,7 +151,7 @@ section span:hover {
 
 .signin .content .form .inputBox input[type="submit"], .signup .content .form .inputBox input[type="submit"] {
   padding: 10px;
-  background: #0f0;
+  background: #EC665F;
   color: #000;
   font-weight: 600;
   font-size: 1.35em;
