@@ -1,6 +1,6 @@
 # Chatify
 
-**Chatify** is a real-time, responsive live chat application built with Django (backend) and vanilla JavaScript (frontend). It is designed for seamless user-to-user communication, featuring message sending, blocking, and message deletion. The app updates in real time, ensuring smooth interaction and usability.
+**Chatify** is a real-time live chat application built with Django (backend) and vanilla JavaScript (frontend). It is designed for seamless user-to-user communication, featuring message sending, blocking, and message deletion. The app updates in real time, ensuring smooth interaction and usability.
 
 ---
 
