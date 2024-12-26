@@ -56,8 +56,9 @@ Here are some example screenshots of Chatify in action:
    cd chatify
    ```
 2. **Run the Makefile**:
+   Make sure you have docker running on your computer
    Run ```make``` to run the app
-3. **Access the App**
+4. **Access the App**
    Open your browser and navigate to ```http://localhost:8001``` to access Chatify's Registration Page.
 
 ---
