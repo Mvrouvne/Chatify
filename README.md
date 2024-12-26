@@ -1,6 +1,6 @@
 # Chatify
 
-**Chatify** is a real-time, responsive live chat application built with Django (backend) and vanilla JavaScript (frontend). It is designed for seamless user-to-user communication, featuring message sending, blocking, and message deletion. The app updates in real time, ensuring smooth interaction and usability.
+**Chatify** is a real-time live chat application built with Django (backend) and vanilla JavaScript (frontend). It is designed for seamless user-to-user communication, featuring message sending, blocking, and message deletion. The app updates in real time, ensuring smooth interaction and usability.
 
 ---
 
@@ -52,17 +52,17 @@ Here are some example screenshots of Chatify in action:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/chatify.git
+   git clone https://github.com/mvrouvne/chatify.git
    cd chatify
    ```
 2. **Run the Makefile**:
    Run ```make``` to run the app
 3. **Access the App**
-   Open your browser and navigate to ```http://localhost:8000``` to access Chatify's Registration Page.
+   Open your browser and navigate to ```http://localhost:8001``` to access Chatify's Registration Page.
 
 ---
 
 ## Important Notes
 
 - **No Default Users**: By default, there are no pre-existing users in Chatify. Any registered user can be accessed via the **Plus (+) icon** or the **'FIND FRIENDS'** feature by searching for their **username**. This allows users to easily connect with others by their unique usernames.
-- The .env file is available you can edit database name and passwords.
+- The /backend/.env file is available you can edit database name and passwords.
