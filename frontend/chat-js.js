@@ -93,33 +93,14 @@ modalCancelButton.addEventListener('click', removeBlur);
 
 modalCancelButton3.addEventListener('click', removeBlur);
 
-// sendButton.addEventListener('click', () => {
-//     if (messageInput.value)
-//     {
-//         console.log(messageInput.value);
-//         messageInput.value = '';
-//     }
-// })
-
-// messageBar.addEventListener('keydown', (event) => {
-//     if (event.key == 'Enter' && messageInput.value)
-//     {
-//         console.log(messageInput.value);
-//         messageInput.value = '';
-//     }
-// })
-
 newChatPageButton.addEventListener('click', addFriend);
 
 // input handling
 
 sideSearchBar.addEventListener('input', (input) => {
-    // console.log(input);
     const value = input.target.value.toLowerCase();
-    // console.log(singleConversationList.single);
     let matchingUsers = [];
     singleConversationList.forEach(singleConversationList => {
-        // console.log(singleConversationList.single);
         let matchingUser = singleConversationList.single.querySelector('.li1').textContent.toLowerCase().includes(value);
         if (matchingUser)
             matchingUsers.push(singleConversationList);
@@ -140,12 +121,10 @@ modalInput.addEventListener('input', (input) => {
     })
         .then(response => response.json())
         .then(data => data.forEach(user => {
-            // console.log(user)
             let newUser = modalUser.cloneNode(true);
-            // console.log(newUser)
             newUser.querySelector('.li1').textContent = user.username;
             newUser.style.display = 'flex';
-            // userField.appendChild(newUser);
+
             if (value != '') {
                 let matchingUser = newUser.querySelector('.li1').textContent.toLowerCase().includes(value);
                 if (matchingUser)
@@ -161,7 +140,7 @@ modalInput.addEventListener('input', (input) => {
 
 function startConversation(singleUser, userData) {
     singleUser.addEventListener('click', () => {
-        console.log(singleUser, userData);
+
         removeBlur();
         const token = localStorage.getItem('authToken');
         fetch('http://localhost:8000/api/create-conv/', {
@@ -174,15 +153,10 @@ function startConversation(singleUser, userData) {
         })
             .then(response => response.json())
             .then(data => {
-                console.log('hnnaaa');
-                console.log(userData.id);
-                console.log(currentUser);
                 if (data['error']) {
-                    console.log('error');
                     for (let i = 0; singleConversationList[i]; i++){
                         if (singleConversationList[i].conv.id == data.id)
                         {
-                            // console.log(singleConversationList[i].single);
                             convClickAction(singleConversationList[i].conv,
                                 singleConversationList[i].single);
                             break;
@@ -190,7 +164,6 @@ function startConversation(singleUser, userData) {
                     }
                 }
                 else {
-                    console.log('noooo error');
                     let newSingleConversation = singleConversation.cloneNode(true);
                     newSingleConversation.querySelector('.li1').textContent = userData.username;
                     newSingleConversation.style.display = 'flex';
@@ -200,20 +173,13 @@ function startConversation(singleUser, userData) {
                     }
                     singleConversationList.push(fullConv);
                     conversations.appendChild(newSingleConversation);
-                    // newSingleConversation.addEventListener('click', () => {
-                    //     convClickAction({ 'id': data.id, 'conversation': userData.username }, singleUser);
-                    // })
+
                     convClick({ 'id': data.id, 'conversation': userData.username }, newSingleConversation);
                     convClickAction({ 'id': data.id, 'conversation': userData.username }, newSingleConversation);
                 }
-                // listConversations();
             })
             .catch(error => console.error('Error:', error));
     })
-}
-
-function urlHandling() {
-
 }
 
 function listConversations() {
@@ -227,7 +193,6 @@ function listConversations() {
             currentUser = data.conversations[0].currentUser;
             if (data.conversations[0].id != undefined) {
                 data.conversations.forEach(conv => {
-                    console.log('dkhaaaaal');
                     let newSingleConversation = singleConversation.cloneNode(true);
                     newSingleConversation.querySelector('.li1').textContent = conv.conversation;
                     newSingleConversation.style.display = 'flex';
@@ -251,25 +216,20 @@ function convClick(conv, singleConv) {
 }
 
 function convClickAction(conv, singleConv) {
-    // console.log(conv);
-    // console.log('--88--');
-    // console.log(singleConv);
+
     if (socket && socket.readyState === WebSocket.OPEN) {
         socket.close(); // Close the current WebSocket
     }
     if (currentConversation)
         currentConversation.style.backgroundColor = '';
     currentConversation = singleConv;
-    console.log('iyeeeehh');
+
     singleConv.style.backgroundColor = '#2E2E2E';
     newChatPage.style.display = 'none';
     conversationTopBar.style.display = 'flex';
     mainChat.style.display = 'flex';
     sending.style.display = 'flex';
-    // if (blockList.includes(conv.id))
-    //     disableMessageBar();
-    // else
-    //     enableMessageBar();
+
     listMessages(conv);
     realTime(conv, singleConv);
 }
@@ -309,17 +269,11 @@ function realTime(conv, singleConv) {
         socket = new WebSocket(`ws://localhost:8000/ws/chat/${conv.id}/?Token=${token}`);
     socket.onmessage = ({ data }) => {
         let receivedMessage = JSON.parse(data);
-        // console.log('mmmmm');
-        // console.log(receivedMessage);
         if (receivedMessage.type == 'send_message') {
-            // console.log(receivedMessage);
             if (receivedMessage.message && receivedMessage.message.trim() != '')
             {
-                // console.log(conv.conversation);
-                // console.log(receivedMessage.user);
                 if (conv.conversation == receivedMessage.user)
                 {
-                    // console.log(singleConv);
                     let newLeftMessage = leftMessage.cloneNode(true);
                     newLeftMessage.querySelector('.left-message-p').textContent = receivedMessage.message;
                     newLeftMessage.style.display = 'inline-block';
@@ -327,7 +281,6 @@ function realTime(conv, singleConv) {
                 }
                 else
                 {
-                    // console.log(singleConv);
                     let newRightMessage = rightMessage.cloneNode(true);
                     newRightMessage.querySelector('.right-message-p').textContent = receivedMessage.message;
                     newRightMessage.style.display = 'inline-block';
@@ -344,16 +297,11 @@ function realTime(conv, singleConv) {
             else
                 messages = mainChat.querySelectorAll('.right-message');
             messages.forEach(message => {
-                console.log(message)
-
                 message.remove();
             })
             removeBlur();
         }
         else if (receivedMessage.type == 'block_user') {
-            console.log('222222222222222222');
-            console.log(receivedMessage);
-            console.log(currentUser);
             blockList.push(conv.id);
             disableMessageBar();
             removeBlur();
@@ -366,7 +314,6 @@ function realTime(conv, singleConv) {
             }
         }
         else if (receivedMessage.type == 'unblock_user') {
-            console.log('333333333333333333');
             enableMessageBar();
             removeBlur();
             blockButton.disabled = false;
@@ -388,7 +335,6 @@ function realTime(conv, singleConv) {
                 if (messageInput.value.trim() != '') {
                     let jsonMessage = {'message': messageInput.value, 'user': singleConv.querySelector('.li1').textContent}
                     socket.send(JSON.stringify(jsonMessage));
-                    // console.log(messageInput.value);
                 }
                 messageInput.value = '';
             }
@@ -398,11 +344,8 @@ function realTime(conv, singleConv) {
             if (event.key == 'Enter' && messageInput.value)
             {
                 if (messageInput.value.trim() != '') {
-                    console.log('dkhaall');
-                    // console.log(messageInput.value.trim())
                     let jsonMessage = {'message': messageInput.value, 'user': singleConv.querySelector('.li1').textContent}
                     socket.send(JSON.stringify(jsonMessage));
-                    // console.log(messageInput.value);
                 }
                 messageInput.value = '';
             }
@@ -410,18 +353,15 @@ function realTime(conv, singleConv) {
 
         deleteChat.addEventListener('click', () => {
             let action = { 'action': 'delete', 'sender_id': `${currentUser}` };
-            console.log(currentUser);
             socket.send(JSON.stringify(action));
         })
 
         blockChat.addEventListener('click', () => {
             let action = { 'action': 'block' };
             socket.send(JSON.stringify(action));
-            console.log(conv);
         })
 
         unblockChat.addEventListener('click', () => {
-            console.log('UNBLOCKK');
             let action = { 'action': 'unblock' };
             socket.send(JSON.stringify(action));
         })
